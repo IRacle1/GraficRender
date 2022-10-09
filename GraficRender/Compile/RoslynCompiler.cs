@@ -44,20 +44,14 @@ public class RoslynCompiler
         EmitResult result = _compilation.Emit(ms);
         if (!result.Success)
         {
-            var compilationErrors = result.Diagnostics.Where(diagnostic =>
+            var firstError = result.Diagnostics.Where(diagnostic =>
                     diagnostic.IsWarningAsError ||
-                    diagnostic.Severity == DiagnosticSeverity.Error)
-                .ToList();
-            if (compilationErrors.Any())
-            {
-                var firstError = compilationErrors.First();
-                var errorNumber = firstError.Id;
-                var errorDescription = firstError.GetMessage();
-                var firstErrorMessage = $"{errorNumber}: {errorDescription};";
-                var exception = new Exception($"Compilation failed, first error is: {firstErrorMessage}");
-                compilationErrors.ForEach(e => { if (!exception.Data.Contains(e.Id)) exception.Data.Add(e.Id, e.GetMessage()); });
-                throw exception;
-            }
+                    diagnostic.Severity == DiagnosticSeverity.Error).First();
+            var errorNumber = firstError.Id;
+            var errorDescription = firstError.GetMessage();
+            var firstErrorMessage = $"{errorNumber}: {errorDescription};";
+            var exception = new Exception($"Compilation failed, first error is: {firstErrorMessage}");
+            throw exception;
         }
 
         ms.Seek(0, SeekOrigin.Begin);

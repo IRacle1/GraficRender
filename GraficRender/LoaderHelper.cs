@@ -7,7 +7,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using GraficRender.Compile;
+using GraficRender.Compile.Attributes;
 using Microsoft.CSharp;
+using Microsoft.Xna.Framework;
 
 namespace GraficRender;
 
@@ -18,6 +20,10 @@ public static class LoaderHelper
             using System.Collections;
             using System.Collections.Generic;
             using System.Numerics;
+
+            using GraficRender.Compile.Attributes;
+
+            using Microsoft.Xna.Framework;
 
             public class CompilerForFunc 
             {
@@ -45,14 +51,15 @@ public static class LoaderHelper
         Dictionary<string, FunctionModel> result = new();
         foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
         {
-            if (CheckMethod(method))
-                result.Add(method.Name, new FunctionModel(method));
+            if (CheckMethod(method, out Color color))
+                result.Add(method.Name, new FunctionModel(method, color));
         }
         return result;
     }
 
-    private static bool CheckMethod(MethodInfo method)
+    private static bool CheckMethod(MethodInfo method, out Color color)
     {
+        color = Color.White;
         if (method.ReturnType != typeof(IEnumerable<float>) && method.ReturnType != typeof(float))
         {
             Console.WriteLine($"Invalid method: {method.Name}");
@@ -62,6 +69,10 @@ public static class LoaderHelper
         {
             Console.WriteLine($"Invalid method: {method.Name}");
             return false;
+        }
+        if (method.GetCustomAttribute<ColorAttribute>() is ColorAttribute colorAttribute)
+        {
+            color = colorAttribute.Color;
         }
         return true;
     }

@@ -9,6 +9,8 @@ using System;
 using Microsoft.CodeAnalysis.Emit;
 using System.Net.Http.Headers;
 using System.Numerics;
+using GraficRender.Compile.Attributes;
+using Microsoft.Xna.Framework;
 
 namespace GraficRender.Compile;
 
@@ -25,6 +27,8 @@ public class RoslynCompiler
         //some default refs
         refs.Add(MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location), "System.Runtime.dll")));
         refs.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+        refs.Add(MetadataReference.CreateFromFile(typeof(ColorAttribute).Assembly.Location));
+        refs.Add(MetadataReference.CreateFromFile(typeof(Color).Assembly.Location));
 
         //generate syntax tree from code and config compilation options
         var syntax = CSharpSyntaxTree.ParseText(code);

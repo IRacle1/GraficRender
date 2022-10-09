@@ -74,11 +74,11 @@ public class MainGame : Game
         {
             if (item.Value.IsMultiPoints)
             {
-                loadedGrafics[item.Key] = item.Value.GetVertexBufferMulti(0f, Color.Red, -10, 10, 0.01f).ToArray();
+                loadedGrafics[item.Key] = item.Value.GetVertexBufferMulti(0f, -10, 10, 0.01f).ToArray();
             }
             else
             {
-                loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, Color.Red, -10, 10, 0.01f).ToArray();
+                loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -10, 10, 0.01f).ToArray();
             }
         }
 
@@ -96,11 +96,11 @@ public class MainGame : Game
             {
                 if (item.Value.IsMultiPoints)
                 {
-                    loadedGrafics[item.Key] = item.Value.GetVertexBufferMulti((float)gameTime.TotalGameTime.TotalSeconds, Color.Red, -10, 10, 0.01f).ToArray();
+                    loadedGrafics[item.Key] = item.Value.GetVertexBufferMulti((float)gameTime.TotalGameTime.TotalSeconds, -10, 10, 0.01f).ToArray();
                 }
                 else
                 {
-                    loadedGrafics[item.Key] = item.Value.GetVertexBuffer((float)gameTime.TotalGameTime.TotalSeconds, Color.Red, -10, 10, 0.01f).ToArray();
+                    loadedGrafics[item.Key] = item.Value.GetVertexBuffer((float)gameTime.TotalGameTime.TotalSeconds, -10, 10, 0.01f).ToArray();
                 }
             }
         }

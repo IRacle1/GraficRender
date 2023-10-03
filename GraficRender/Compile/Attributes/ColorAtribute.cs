@@ -10,11 +10,11 @@ namespace GraficRender.Compile.Attributes
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     public sealed class ColorAttribute : Attribute
     {
-        public ColorAttribute(Color color)
+        public ColorAttribute(int r, int g, int b)
         {
-            Color = color;
+            Color = new Color(r, g, b);
         }
 
-        public Color Color { get; set; }
+        public Color Color { get; }
     }
 }

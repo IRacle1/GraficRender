@@ -9,6 +9,8 @@ namespace GraficRender;
 
 public class MainGame : Game
 {
+    public float Coef;
+
     GraphicsDeviceManager graphics;
     BasicEffect effect;
 
@@ -37,12 +39,19 @@ public class MainGame : Game
     {
         viewMatrix = Matrix.CreateLookAt(new Vector3(0, 0, 6), Vector3.Zero, Vector3.Up);
 
+        Coef = (float)Window.ClientBounds.Width /
+            (float)Window.ClientBounds.Height;
+
         projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-            (float)Window.ClientBounds.Width /
-            (float)Window.ClientBounds.Height,
-            1, 6);
+            Coef,
+            1, 10);
 
         worldMatrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up);
+
+        //graphics.PreferredBackBufferHeight /= 2;
+        //graphics.PreferredBackBufferWidth /= 2;
+
+        graphics.ApplyChanges();
 
         effect = new(GraphicsDevice)
         {
@@ -72,14 +81,7 @@ public class MainGame : Game
 
         foreach (var item in Functions)
         {
-            if (item.Value.IsMultiPoints)
-            {
-                loadedGrafics[item.Key] = item.Value.GetVertexBufferMulti(0f, -10, 10, 0.01f).ToArray();
-            }
-            else
-            {
-                loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -10, 10, 0.01f).ToArray();
-            }
+            loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -5, 5, 0.001f).ToArray();
         }
 
         base.Initialize();
@@ -92,16 +94,9 @@ public class MainGame : Game
 
         foreach (var item in Functions)
         {
-            if (item.Value.ShouldUpdate)
+            if (item.Value.HasDynamicArgument)
             {
-                if (item.Value.IsMultiPoints)
-                {
-                    loadedGrafics[item.Key] = item.Value.GetVertexBufferMulti((float)gameTime.TotalGameTime.TotalSeconds, -10, 10, 0.01f).ToArray();
-                }
-                else
-                {
-                    loadedGrafics[item.Key] = item.Value.GetVertexBuffer((float)gameTime.TotalGameTime.TotalSeconds, -10, 10, 0.01f).ToArray();
-                }
+                loadedGrafics[item.Key] = item.Value.GetVertexBuffer((float)gameTime.TotalGameTime.TotalSeconds, -5, 5, 0.001f).ToArray();
             }
         }
 

@@ -1,3 +1,8 @@
-﻿
-using var mainGame = new GraficRender.MainGame();
-mainGame.Run();
+﻿namespace GraficRender;
+
+internal class Program {
+    private static void Main(string[] args) {
+        using var mainGame = new MainGame();
+        mainGame.Run();
+    }
+}

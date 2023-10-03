@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using GraficRender.Compile.Attributes;
+
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -19,23 +21,15 @@ public class FunctionModel
 
     public MethodInfo Method { get; }
 
-    private bool? _shouldUpdate;
-    public bool ShouldUpdate => _shouldUpdate ??= Arguments.Any(parameter => parameter.Name is "t" or "time" && parameter.ParameterType == typeof(float));
-
-    private bool? _multiPoints;
-    public bool IsMultiPoints => _multiPoints ??= Method.ReturnType == typeof(IEnumerable<float>);
+    private bool? _hasDynamicArgument;
+    public bool HasDynamicArgument => _hasDynamicArgument ??= Arguments.Any(parameter => parameter.ParameterType == typeof(float) && parameter.GetCustomAttribute<DynamicParameter>() != null);
 
     private ParameterInfo[]? _arguments;
     public ParameterInfo[] Arguments => _arguments ??= Method.GetParameters();
 
-    public float Invoke(float x, float? time)
+    public float Invoke(float x, float time)
     {
-        return (float)Method.Invoke(null, ShouldUpdate ? new object[] { x, time.Value } : new object[] { x });
-    }
-
-    public IEnumerable<float> InvokeMulti(float x, float? time)
-    {
-        return (IEnumerable<float>)Method.Invoke(null, ShouldUpdate ? new object[] { x, time.Value } : new object[] { x });
+        return (float)Method.Invoke(null, HasDynamicArgument ? new object[] { x, time } : new object[] { x })!;
     }
 
     public List<VertexPositionColor> GetVertexBuffer(float time, int minValue, int maxValue, float step)
@@ -50,26 +44,6 @@ public class FunctionModel
                 continue;
 
             list.Add(new VertexPositionColor { Color = Color, Position = new Vector3(x, y, 0f) });
-        }
-
-        return list;
-    }
-
-    public List<VertexPositionColor> GetVertexBufferMulti(float time, int minValue, int maxValue, float step)
-    {
-        time = MathF.Round(time, 2);
-        List<VertexPositionColor> list = new();
-        for (float x = minValue; x < maxValue; x += step)
-        {
-            foreach (float res in InvokeMulti(x, time))
-            {
-                float y = MathF.Round(res, 4);
-
-                if (!float.IsNormal(y))
-                    continue;
-
-                list.Add(new VertexPositionColor { Color = Color, Position = new Vector3(x, y, 0f) });
-            }
         }
 
         return list;

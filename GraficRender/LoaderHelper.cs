@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using GraficRender.Compile;
@@ -30,11 +31,17 @@ public static class LoaderHelper
                 {code}
             }
             """;
-    private static Assembly? currentassembly;
-    public static Assembly CurrentAssembly => currentassembly ??= GetAssembly();
+    private static Assembly? _currentassembly;
+    public static Assembly CurrentAssembly => _currentassembly ??= GetAssembly();
+    public static string FilePath => $"Functions\\cashedassembly{DateTime.Now:d}.dll";
 
     private static Assembly GetAssembly()
     {
+        if (File.Exists(FilePath))
+        {
+            using var stream = File.OpenRead(FilePath);
+            return AssemblyLoadContext.Default.LoadFromStream(stream);
+        }
         StringBuilder stringBuilder = new StringBuilder();
         foreach (string file in Directory.EnumerateFiles("Functions"))
         {
@@ -47,7 +54,7 @@ public static class LoaderHelper
 
     public static Dictionary<string, FunctionModel> LoadAll()
     {
-        Type type = CurrentAssembly.GetType("CompilerForFunc");
+        Type type = CurrentAssembly.GetType("CompilerForFunc")!;
         Dictionary<string, FunctionModel> result = new();
         foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
         {
@@ -60,7 +67,7 @@ public static class LoaderHelper
     private static bool CheckMethod(MethodInfo method, out Color color)
     {
         color = Color.White;
-        if (method.ReturnType != typeof(IEnumerable<float>) && method.ReturnType != typeof(float))
+        if (method.ReturnType != typeof(float))
         {
             Console.WriteLine($"Invalid method: {method.Name}");
             return false;

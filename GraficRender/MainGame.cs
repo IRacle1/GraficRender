@@ -10,9 +10,12 @@ namespace GraficRender;
 public class MainGame : Game
 {
     public float Coef;
+    public static float Step = 0.001f;
 
-    GraphicsDeviceManager graphics;
-    BasicEffect effect;
+    public static Vector2 Offset = Vector2.Zero;
+
+    GraphicsDeviceManager graphics = null!;
+    BasicEffect effect = null!;
 
     Matrix projectionMatrix;
     Matrix viewMatrix;
@@ -27,7 +30,7 @@ public class MainGame : Game
     };
 
     Dictionary<string, VertexPositionColor[]> loadedGrafics = new();
-    Dictionary<string, FunctionModel> Functions;
+    Dictionary<string, FunctionModel> Functions = null!;
 
     public MainGame()
     {
@@ -48,9 +51,6 @@ public class MainGame : Game
 
         worldMatrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up);
 
-        //graphics.PreferredBackBufferHeight /= 2;
-        //graphics.PreferredBackBufferWidth /= 2;
-
         graphics.ApplyChanges();
 
         effect = new(GraphicsDevice)
@@ -68,7 +68,7 @@ public class MainGame : Game
         if (!Directory.Exists("Functions"))
         {
             Directory.CreateDirectory("Functions");
-            using StreamWriter stream = new StreamWriter(File.Create($"Functions/parabola.txt"));
+            using StreamWriter stream = new StreamWriter(File.Create($"Functions/parabola.cs"));
             stream.Write("""
                     public static float Parabola(float x) 
                     {
@@ -81,7 +81,7 @@ public class MainGame : Game
 
         foreach (var item in Functions)
         {
-            loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -5, 5, 0.001f).ToArray();
+            loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -5, 5, Step).ToArray();
         }
 
         base.Initialize();
@@ -96,7 +96,7 @@ public class MainGame : Game
         {
             if (item.Value.HasDynamicArgument)
             {
-                loadedGrafics[item.Key] = item.Value.GetVertexBuffer((float)gameTime.TotalGameTime.TotalSeconds, -5, 5, 0.001f).ToArray();
+                loadedGrafics[item.Key] = item.Value.GetVertexBuffer((float)gameTime.TotalGameTime.TotalSeconds, -5, 5, Step).ToArray();
             }
         }
 

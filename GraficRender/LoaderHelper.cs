@@ -23,6 +23,7 @@ public static class LoaderHelper
             using System.Numerics;
 
             using GraficRender.Compile.Attributes;
+            //using GraficRender.Compile.Helpers;
 
             using Microsoft.Xna.Framework;
 

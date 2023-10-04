@@ -27,6 +27,8 @@ public class FunctionModel
     private ParameterInfo[]? _arguments;
     public ParameterInfo[] Arguments => _arguments ??= Method.GetParameters();
 
+    private List<VertexPositionColor> _calculatedPosition = new();
+
     public float Invoke(float x, float time)
     {
         return (float)Method.Invoke(null, HasDynamicArgument ? new object[] { x, time } : new object[] { x })!;
@@ -35,7 +37,7 @@ public class FunctionModel
     public List<VertexPositionColor> GetVertexBuffer(float time, int minValue, int maxValue, float step)
     {
         time = MathF.Round(time, 2);
-        List<VertexPositionColor> list = new();
+        _calculatedPosition.Clear();
         for (float x = minValue; x < maxValue; x += step)
         {
             float y = MathF.Round(Invoke(x, time), 4);
@@ -43,9 +45,9 @@ public class FunctionModel
             if (!float.IsNormal(y))
                 continue;
 
-            list.Add(new VertexPositionColor { Color = Color, Position = new Vector3(x, y, 0f) });
+            _calculatedPosition.Add(new VertexPositionColor { Color = Color, Position = new Vector3(x, y, 0f) });
         }
 
-        return list;
+        return _calculatedPosition;
     }
 }

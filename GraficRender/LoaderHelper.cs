@@ -32,19 +32,20 @@ public static class LoaderHelper
                 {code}
             }
             """;
-    private static Assembly? _currentassembly;
-    public static Assembly CurrentAssembly => _currentassembly ??= GetAssembly();
+
+    public static Assembly? CurrentAssembly { get; set; }
+
     public static string FilePath => $"Functions\\cashedassembly{DateTime.Now:d}.dll";
 
-    private static Assembly GetAssembly()
+    private static Assembly? GetAssembly(bool forceCompile = false)
     {
-        if (File.Exists(FilePath))
+        if (!forceCompile && File.Exists(FilePath))
         {
             using var stream = File.OpenRead(FilePath);
             return AssemblyLoadContext.Default.LoadFromStream(stream);
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        foreach (string file in Directory.EnumerateFiles("Functions"))
+        StringBuilder stringBuilder = new();
+        foreach (string file in Directory.EnumerateFiles("Functions", "*.cs"))
         {
             stringBuilder.Append(File.ReadAllText(file));
         }
@@ -53,15 +54,25 @@ public static class LoaderHelper
         return compiler.Compile();
     }
 
-    public static Dictionary<string, FunctionModel> LoadAll()
+    public static Dictionary<string, FunctionModel> LoadAll(bool forceCompile = false)
     {
-        Type type = CurrentAssembly.GetType("CompilerForFunc")!;
         Dictionary<string, FunctionModel> result = new();
+
+        CurrentAssembly = GetAssembly(forceCompile);
+
+        if (CurrentAssembly == null)
+        {
+            return result;
+        }
+
+        Type type = CurrentAssembly.GetType("CompilerForFunc")!;
+
         foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
         {
             if (CheckMethod(method, out Color color))
                 result.Add(method.Name, new FunctionModel(method, color));
         }
+
         return result;
     }
 

@@ -22,7 +22,7 @@ public class FunctionModel
     public MethodInfo Method { get; }
 
     private bool? _hasDynamicArgument;
-    public bool HasDynamicArgument => _hasDynamicArgument ??= Arguments.Any(parameter => parameter.ParameterType == typeof(float) && parameter.GetCustomAttribute<DynamicParameter>() != null);
+    public bool HasDynamicArgument => _hasDynamicArgument ??= Arguments.Any(parameter => parameter.ParameterType == typeof(float) && parameter.GetCustomAttribute<Compile.Attributes.DynamicParameter>() != null);
 
     private ParameterInfo[]? _arguments;
     public ParameterInfo[] Arguments => _arguments ??= Method.GetParameters();
@@ -49,5 +49,33 @@ public class FunctionModel
         }
 
         return _calculatedPosition;
+    }
+
+    public float TakeDerivative(float x, float time)
+    {
+        return (Invoke(x + MainGame.Step, time) - Invoke(x, time)) / MainGame.Step;
+    }
+
+    public class FunctionInfo
+    {
+        public Color Color { get; set; }
+        public List<DynamicParameter> DynamicParameters { get; set; } = new();
+    }
+
+    public class DynamicParameter
+    {
+        public float Min { get; }
+        public float Max { get; }
+
+        // x - (y * y / x)
+        public float Calculate(float time)
+        {
+            if (time > Max)
+            {
+               return time - Max * MathF.Floor(Max / time);
+            }
+
+            return time;
+        }
     }
 }

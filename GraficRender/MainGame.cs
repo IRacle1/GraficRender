@@ -10,7 +10,7 @@ namespace GraficRender;
 public class MainGame : Game
 {
     public float Coef;
-    public static float Step = 0.001f;
+    public const float Step = 0.001f;
 
     public static Vector2 Offset = Vector2.Zero;
 
@@ -30,7 +30,7 @@ public class MainGame : Game
     };
 
     Dictionary<string, VertexPositionColor[]> loadedGrafics = new();
-    Dictionary<string, FunctionModel> Functions = null!;
+    public Dictionary<string, FunctionModel> Functions = null!;
 
     public MainGame()
     {
@@ -85,6 +85,14 @@ public class MainGame : Game
         }
 
         base.Initialize();
+    }
+
+    internal void InitGrafs()
+    {
+        foreach (var item in Functions)
+        {
+            loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -5, 5, Step).ToArray();
+        }
     }
 
     protected override void Update(GameTime gameTime)

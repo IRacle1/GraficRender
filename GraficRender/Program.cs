@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 namespace GraficRender;
 
 internal class Program {
+
+    private static MainGame MainGame;
     private static void Main(string[] args) {
         Task.Run(ConsoleHandle);
-        using var mainGame = new MainGame();
-        mainGame.Run();
+        MainGame = new MainGame();
+        MainGame.Run();
     }
 
     private static void ConsoleHandle()
@@ -15,7 +17,15 @@ internal class Program {
         while (true)
         {
             Console.WriteLine("amogus");
-            Console.ReadLine();
+            switch (Console.ReadLine())
+            {
+                case "reset":
+                    MainGame.Functions = LoaderHelper.LoadAll(true);
+                    MainGame.InitGrafs();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

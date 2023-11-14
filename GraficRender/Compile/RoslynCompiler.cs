@@ -39,7 +39,7 @@ public class RoslynCompiler
         _compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), new List<SyntaxTree> { syntax }, refs, options);
     }
 
-    public Assembly Compile()
+    public Assembly? Compile()
     {
         if(_generatedAssembly != null)
             return _generatedAssembly;
@@ -52,8 +52,8 @@ public class RoslynCompiler
             var errorNumber = firstError.Id;
             var errorDescription = firstError.GetMessage();
             var firstErrorMessage = $"{errorNumber}: {errorDescription};";
-            var exception = new Exception($"Compilation failed, first error is: {firstErrorMessage}");
-            throw exception;
+            Console.WriteLine($"Compilation failed, first error is: {firstErrorMessage}");
+            return null;
         }
 
         using var fileStream = File.OpenWrite(LoaderHelper.FilePath);

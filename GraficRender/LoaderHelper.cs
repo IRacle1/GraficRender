@@ -32,7 +32,6 @@ public static class LoaderHelper
     public static Assembly? CurrentAssembly { get; set; }
     public static Type? MainType { get; set; }
 
-
     public static List<DynamicParameter> DynamicParameters { get; } = new();
 
     public static string FilePath => $"Functions\\cashedassembly{DateTime.Now:d}.dll";

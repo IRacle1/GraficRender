@@ -1,17 +1,12 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
-using System.Threading.Tasks;
 using GraficRender.Compile;
 using GraficRender.Compile.Attributes;
-using Microsoft.CSharp;
-using Microsoft.Xna.Framework;
 
 namespace GraficRender;
 

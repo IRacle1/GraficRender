@@ -77,8 +77,7 @@ public class MainGame : Game
                     """);
         }
 
-        Functions = LoaderHelper.LoadAll();
-
+        Functions = LoaderHelper.LoadAll(true);
         UpdateParameters(0.0f);
         LoadGrafs(false);
 

@@ -19,22 +19,11 @@ namespace GraficRender
 
         public FieldInfo FieldInfo { get; }
 
-        // x - (y * y / x)
-        public float Calculate(float time)
-        {
-            if (time > Max)
-            {
-                return time - Max * MathF.Floor(Max / time);
-            }
-
-            return time;
-        }
-
         public float CalculateSin(float time)
         {
             float middle = (Max + Min) / 2;
             float delta = Max - middle;
-            return delta * MathF.Sin(4 * MathF.PI * time) + middle;
+            return delta * MathF.Sin(0.5f * MathF.PI * time) + middle;
         }
 
         public void Set(float time)

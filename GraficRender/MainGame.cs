@@ -23,10 +23,10 @@ public class MainGame : Game
 
     VertexPositionColor[] axes = new VertexPositionColor[]
     {
-        new VertexPositionColor { Color = Color.White, Position = new Vector3(-10000f, 0f, 0f) },
-        new VertexPositionColor { Color = Color.White, Position = new Vector3(10000f, 0f, 0f) },
-        new VertexPositionColor { Color = Color.White, Position = new Vector3(0f, -10000f, 0f) },
-        new VertexPositionColor { Color = Color.White, Position = new Vector3(0f, 10000f, 0f) }
+        new() { Color = Color.White, Position = new Vector3(-10000f, 0f, 0f) },
+        new() { Color = Color.White, Position = new Vector3(10000f, 0f, 0f) },
+        new() { Color = Color.White, Position = new Vector3(0f, -10000f, 0f) },
+        new() { Color = Color.White, Position = new Vector3(0f, 10000f, 0f) }
     };
 
     Dictionary<string, VertexPositionColor[]> loadedGrafics = new();
@@ -79,19 +79,26 @@ public class MainGame : Game
 
         Functions = LoaderHelper.LoadAll();
 
-        foreach (var item in Functions)
-        {
-            loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -5, 5, Step).ToArray();
-        }
+        UpdateParameters(0.0f);
+        LoadGrafs(false);
 
         base.Initialize();
     }
 
-    internal void InitGrafs()
+    private void LoadGrafs(bool checkUpdate = false)
     {
         foreach (var item in Functions)
         {
-            loadedGrafics[item.Key] = item.Value.GetVertexBuffer(0f, -5, 5, Step).ToArray();
+            if (!checkUpdate || item.Value.Info.ShouldUpdate)
+                loadedGrafics[item.Key] = item.Value.GetVertexBuffer(-5, 5, Step).ToArray();
+        }
+    }
+
+    private void UpdateParameters(float time)
+    {
+        foreach (DynamicParameter parameter in LoaderHelper.DynamicParameters)
+        {
+            parameter.Set(time);
         }
     }
 
@@ -100,13 +107,9 @@ public class MainGame : Game
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        foreach (var item in Functions)
-        {
-            if (item.Value.HasDynamicArgument)
-            {
-                loadedGrafics[item.Key] = item.Value.GetVertexBuffer((float)gameTime.TotalGameTime.TotalSeconds, -5, 5, Step).ToArray();
-            }
-        }
+        UpdateParameters((float)gameTime.TotalGameTime.TotalSeconds);
+
+        LoadGrafs(true);
 
         base.Update(gameTime);
     }

@@ -1,81 +1,61 @@
-﻿using GraficRender.Compile.Attributes;
-
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace GraficRender;
 
 public class FunctionModel
 {
-    public FunctionModel(MethodInfo method, Color color)
+    public FunctionModel(MethodInfo method)
     {
-        Color = color;
         Method = method;
     }
 
-    public Color Color;
+    public FunctionInfo Info { get; } = new(Color.White);
 
     public MethodInfo Method { get; }
 
-    private bool? _hasDynamicArgument;
-    public bool HasDynamicArgument => _hasDynamicArgument ??= Arguments.Any(parameter => parameter.ParameterType == typeof(float) && parameter.GetCustomAttribute<Compile.Attributes.DynamicParameter>() != null);
-
-    private ParameterInfo[]? _arguments;
-    public ParameterInfo[] Arguments => _arguments ??= Method.GetParameters();
-
     private List<VertexPositionColor> _calculatedPosition = new();
 
-    public float Invoke(float x, float time)
+    public float Invoke(float x)
     {
-        return (float)Method.Invoke(null, HasDynamicArgument ? new object[] { x, time } : new object[] { x })!;
+        return (float)Method.Invoke(null, new object[] { x })!;
     }
 
-    public List<VertexPositionColor> GetVertexBuffer(float time, int minValue, int maxValue, float step)
+    public List<VertexPositionColor> GetVertexBuffer(int minValue, int maxValue, float step)
     {
-        time = MathF.Round(time, 2);
         _calculatedPosition.Clear();
+        bool derivative = Info.Derivative;
         for (float x = minValue; x < maxValue; x += step)
         {
-            float y = MathF.Round(Invoke(x, time), 4);
+            float y = derivative ? TakeDerivative(x) : Invoke(x);
+            y = MathF.Round(y, 4);
 
-            if (!float.IsNormal(y))
+            if (float.IsNaN(y))
                 continue;
 
-            _calculatedPosition.Add(new VertexPositionColor { Color = Color, Position = new Vector3(x, y, 0f) });
+            _calculatedPosition.Add(new VertexPositionColor { Color = Info.Color, Position = new Vector3(x, y, 0f) });
         }
 
         return _calculatedPosition;
     }
 
-    public float TakeDerivative(float x, float time)
+    public float TakeDerivative(float x)
     {
-        return (Invoke(x + MainGame.Step, time) - Invoke(x, time)) / MainGame.Step;
+        return (Invoke(x + MainGame.Step) - Invoke(x)) / MainGame.Step;
     }
 
     public class FunctionInfo
     {
-        public Color Color { get; set; }
-        public List<DynamicParameter> DynamicParameters { get; set; } = new();
-    }
-
-    public class DynamicParameter
-    {
-        public float Min { get; }
-        public float Max { get; }
-
-        // x - (y * y / x)
-        public float Calculate(float time)
+        public FunctionInfo(Color color)
         {
-            if (time > Max)
-            {
-               return time - Max * MathF.Floor(Max / time);
-            }
-
-            return time;
+            Color = color;
         }
+
+        public Color Color { get; set; }
+        public bool ShouldUpdate { get; set; } = false;
+        public bool Derivative { get; set; } = false;
     }
 }

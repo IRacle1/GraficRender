@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,6 +35,10 @@ public static class LoaderHelper
             """;
 
     public static Assembly? CurrentAssembly { get; set; }
+    public static Type? MainType { get; set; }
+
+
+    public static List<DynamicParameter> DynamicParameters { get; } = new();
 
     public static string FilePath => $"Functions\\cashedassembly{DateTime.Now:d}.dll";
 
@@ -65,20 +70,34 @@ public static class LoaderHelper
             return result;
         }
 
-        Type type = CurrentAssembly.GetType("CompilerForFunc")!;
+        foreach (FieldInfo field in CurrentAssembly.GetType("CompilerForFunc")!.GetFields())
+        {
+            if (field.GetCustomAttribute<DynamicParameterAttribute>() is not DynamicParameterAttribute param)
+                continue;
+
+            DynamicParameters.Add(new DynamicParameter(field, param.Min, param.Max));
+        }
+
+        Type type = MainType = CurrentAssembly.GetType("CompilerForFunc")!;
 
         foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
         {
-            if (CheckMethod(method, out Color color))
-                result.Add(method.Name, new FunctionModel(method, color));
+            if (CheckMethod(method))
+            {
+                FunctionModel model = new(method);
+                foreach (AttributedModule attribute in method.GetCustomAttributes<AttributedModule>())
+                {
+                    attribute.WriteToInfo(model.Info);
+                }
+                result.Add(method.Name, model);
+            }
         }
 
         return result;
     }
 
-    private static bool CheckMethod(MethodInfo method, out Color color)
+    private static bool CheckMethod(MethodInfo method)
     {
-        color = Color.White;
         if (method.ReturnType != typeof(float))
         {
             Console.WriteLine($"Invalid method: {method.Name}");
@@ -89,10 +108,7 @@ public static class LoaderHelper
             Console.WriteLine($"Invalid method: {method.Name}");
             return false;
         }
-        if (method.GetCustomAttribute<ColorAttribute>() is ColorAttribute colorAttribute)
-        {
-            color = colorAttribute.Color;
-        }
+
         return true;
     }
 }

@@ -21,7 +21,6 @@ internal class Program {
             {
                 case "reset":
                     MainGame.Functions = LoaderHelper.LoadAll(true);
-                    MainGame.InitGrafs();
                     break;
                 default:
                     break;

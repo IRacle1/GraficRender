@@ -83,7 +83,8 @@ public static class LoaderHelper
                 {
                     attribute.WriteToInfo(model.Info);
                 }
-                result.Add(method.Name, model);
+                if (!model.Info.Ignore)
+                    result.Add(method.Name, model);
             }
         }
 

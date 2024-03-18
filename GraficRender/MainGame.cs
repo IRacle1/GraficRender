@@ -51,6 +51,9 @@ public class MainGame : Game
 
         worldMatrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up);
 
+        graphics.IsFullScreen = false;
+        graphics.PreferredBackBufferWidth = 1080;
+        graphics.PreferredBackBufferHeight = 720;
         graphics.ApplyChanges();
 
         effect = new(GraphicsDevice)
@@ -77,6 +80,7 @@ public class MainGame : Game
                     """);
         }
 
+        //TODO: поменять уже когда не лень будет
         Functions = LoaderHelper.LoadAll(true);
         UpdateParameters(0.0f);
         LoadGrafs(false);
@@ -89,7 +93,7 @@ public class MainGame : Game
         foreach (var item in Functions)
         {
             if (!checkUpdate || item.Value.Info.ShouldUpdate)
-                loadedGrafics[item.Key] = item.Value.GetVertexBuffer(-5, 5, Step).ToArray();
+                loadedGrafics[item.Key] = item.Value.GetVertexBuffer(-5, 5, item.Value.Info.Step).ToArray();
         }
     }
 

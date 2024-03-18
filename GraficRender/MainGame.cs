@@ -73,9 +73,19 @@ public class MainGame : Game
             Directory.CreateDirectory("Functions");
             using StreamWriter stream = new StreamWriter(File.Create($"Functions/parabola.cs"));
             stream.Write("""
+                    [DynamicParameter(1, 10)]
+                    public static float a;
+
+                    [Color(0, 100, 100)]
+                    [Update]
+                    public static float SinDerv(float x)
+                    {
+                    	return a * MathF.Sin(x);
+                    }
+
                     public static float Parabola(float x) 
                     {
-                    	return x * x;
+                       	return x * x;
                     }
                     """);
         }

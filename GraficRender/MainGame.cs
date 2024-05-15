@@ -55,6 +55,7 @@ public class MainGame : Game
 
         worldMatrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up);
 
+        Window.AllowUserResizing = true;
         graphics.IsFullScreen = false;
         graphics.PreferredBackBufferWidth = 1080;
         graphics.PreferredBackBufferHeight = 720;
@@ -73,7 +74,7 @@ public class MainGame : Game
         TargetElapsedTime = TimeSpan.FromSeconds(1d / 60);
 
         //TODO: поменять уже когда не лень будет
-        Functions = LoaderHelper.LoadAll(true);
+        Functions = LoaderHelper.LoadAll(false);
         UpdateParameters(0.0f);
         LoadGrafs(false);
 
@@ -82,9 +83,25 @@ public class MainGame : Game
 
     private void Window_KeyDown(object? sender, InputKeyEventArgs e)
     {
-        int val = (int)e.Key - 48;
-        if (val >= 1 && val <= 9)
+        if (e.Key == Keys.F11)
         {
+            if (!graphics.IsFullScreen)
+            {
+                graphics.PreferredBackBufferWidth = 1920;
+                graphics.PreferredBackBufferHeight = 1080;
+            }
+            else
+            {
+                graphics.PreferredBackBufferWidth = 1080;
+                graphics.PreferredBackBufferHeight = 720;
+            }
+            graphics.ToggleFullScreen();
+        }
+        int val = (int)e.Key - 48;
+        if (val >= 0 && val <= 9)
+        {
+            if (val == 0)
+                val = 10;
             if (Functions.ContainsKey(val))
             {
                 bool hide = Functions[val].Info.Hide;

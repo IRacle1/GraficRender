@@ -49,7 +49,7 @@ public static class LoaderHelper
             stringBuilder.Append(File.ReadAllText(file));
         }
 
-        RoslynCompiler compiler = new RoslynCompiler(Example.Replace("{code}", stringBuilder.ToString()), Array.Empty<Type>());
+        RoslynCompiler compiler = new RoslynCompiler(Example.Replace("{code}", stringBuilder.ToString()));
         return compiler.Compile();
     }
 

@@ -19,13 +19,18 @@ public class RoslynCompiler
 
     private Assembly? _generatedAssembly;
 
-    public RoslynCompiler(string content, Type[] typesToReference)
+    public RoslynCompiler(string content)
     {
-        List<MetadataReference> refs = typesToReference.Select(h => MetadataReference.CreateFromFile(h.Assembly.Location) as MetadataReference).ToList();
+        List<MetadataReference> refs = new();
+
+        var rtPath = Path.GetDirectoryName(typeof(object).Assembly.Location) + Path.DirectorySeparatorChar;
+
+        refs.Add(MetadataReference.CreateFromFile(rtPath + "System.Private.CoreLib.dll"));
+        refs.Add(MetadataReference.CreateFromFile(rtPath + "System.Runtime.dll"));
 
         //some default refs
-        refs.Add(MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location)!, "System.Runtime.dll")));
-        refs.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+        //refs.Add(MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location)!, "System.Runtime.dll")));
+        //refs.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
         refs.Add(MetadataReference.CreateFromFile(typeof(ColorAttribute).Assembly.Location));
         refs.Add(MetadataReference.CreateFromFile(typeof(Color).Assembly.Location));
 

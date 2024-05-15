@@ -53,9 +53,34 @@ public static class LoaderHelper
         return compiler.Compile();
     }
 
-    public static Dictionary<string, FunctionModel> LoadAll(bool forceCompile = false)
+    public static Dictionary<int, FunctionModel> LoadAll(bool forceCompile = false)
     {
-        Dictionary<string, FunctionModel> result = new();
+        if (!Directory.Exists("Functions"))
+        {
+            Directory.CreateDirectory("Functions");
+            using StreamWriter stream = new(File.Create($"Functions/parabola.cs"));
+            stream.Write("""
+                    [Title]
+                    public static string Title = "Temp1";
+
+                    [DynamicParameter(-1, 1)]
+                    public static float a;
+
+                    [Color(0, 100, 100)]
+                    [Update]
+                    public static float SinDerv(float x)
+                    {
+                    	return a * MathF.Sin(x);
+                    }
+
+                    public static float Parabola(float x) 
+                    {
+                       	return x * x;
+                    }
+                    """);
+        }
+
+        Dictionary<int, FunctionModel> result = new();
 
         CurrentAssembly = GetAssembly(forceCompile);
 
@@ -64,27 +89,35 @@ public static class LoaderHelper
             return result;
         }
 
-        foreach (FieldInfo field in CurrentAssembly.GetType("CompilerForFunc")!.GetFields())
+        Type type = MainType = CurrentAssembly.GetType("CompilerForFunc")!;
+
+        foreach (FieldInfo field in type.GetFields())
         {
+            if (field.GetCustomAttribute<TitleAttribute>() is not null && field.GetValue(null) is string title)
+            {
+                MainGame.Instance.Window.Title = title;
+            }
             if (field.GetCustomAttribute<DynamicParameterAttribute>() is not DynamicParameterAttribute param)
                 continue;
 
             DynamicParameters.Add(new DynamicParameter(field, param.Min, param.Max));
         }
 
-        Type type = MainType = CurrentAssembly.GetType("CompilerForFunc")!;
+        int id = 1;
 
         foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
         {
             if (CheckMethod(method))
             {
                 FunctionModel model = new(method);
+
                 foreach (AttributedModule attribute in method.GetCustomAttributes<AttributedModule>())
                 {
                     attribute.WriteToInfo(model.Info);
                 }
+
                 if (!model.Info.Ignore)
-                    result.Add(method.Name, model);
+                    result.Add(id++, model);
             }
         }
 

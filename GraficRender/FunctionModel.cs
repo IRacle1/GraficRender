@@ -109,5 +109,7 @@ public class FunctionModel
         public float Step { get; set; } = MainGame.Step;
         public bool Ignore { get; set; } = false;
         public float IntegrateConstant { get; set; } = 0;
+
+        public bool Hide { get; set; } = false;
     }
 }
